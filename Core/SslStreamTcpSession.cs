@@ -32,11 +32,11 @@ namespace SuperSocket.ClientEngine
 
 #if NETSTANDARD
 
-                AuthenticateAsClientAsync(new SslStream(new NetworkStream(client), false, ValidateRemoteCertificate), Security);             
+                AuthenticateAsClientAsync(new SslStream(new NetworkStream(client), false, ValidateRemoteCertificate, securityOption.UserLocalCertificateSelectionCallback), Security);
  
 #else
 
-                var sslStream = new SslStream(new NetworkStream(client), false, ValidateRemoteCertificate);
+                var sslStream = new SslStream(new NetworkStream(client), false, ValidateRemoteCertificate, securityOption.UserLocalCertificateSelectionCallback);
                 sslStream.BeginAuthenticateAsClient(HostName, securityOption.Certificates, securityOption.EnabledSslProtocols, false, OnAuthenticated, sslStream);
                 
 #endif
@@ -100,8 +100,13 @@ namespace SuperSocket.ClientEngine
         /// <returns></returns>
         private bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
+            var callback = Security.UserRemoteCertificateValidationCallback;
+
+            if (callback != null)
+                return callback(sender, certificate, chain, sslPolicyErrors);
+
 #if !NETSTANDARD
-            var callback = ServicePointManager.ServerCertificateValidationCallback;
+            callback = ServicePointManager.ServerCertificateValidationCallback;
 
             if (callback != null)
                 return callback(sender, certificate, chain, sslPolicyErrors);

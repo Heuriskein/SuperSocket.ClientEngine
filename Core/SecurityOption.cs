@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -41,6 +42,14 @@ namespace SuperSocket.ClientEngine
 
         public NetworkCredential Credential { get; set; }
 
+        /// Custom function to call when we need to validate a remote certificate.
+        /// </summary>
+        public RemoteCertificateValidationCallback UserRemoteCertificateValidationCallback { get; set; }
+
+        /// <summary>
+        /// Custom funciton to call when we need to select a local certificate.
+        /// </summary>
+        public LocalCertificateSelectionCallback UserLocalCertificateSelectionCallback { get; set; }
 
         public SecurityOption()
             : this(GetDefaultProtocol(), new X509CertificateCollection())
